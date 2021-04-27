@@ -82,12 +82,19 @@ resource "aws_security_group" "jenkins-sg" {
   }
 }
 
+resource "aws_network_interface" "jenkins_network_interface" {
+  subnet_id       = "${aws_subnet.public.id}"
+  private_ips 	  = ["${var.jenkins_ip}"]
+  security_groups = ["${aws_security_group.jenkins-sg.id}"]
+}
+
 resource "aws_instance" "jenkins-server" {
   ami                         = data.aws_ami.ubuntu_linux.id
   instance_type               = "t2.large"
-  vpc_security_group_ids      = ["${aws_security_group.jenkins-sg.id}"]
-  subnet_id                   = "${aws_subnet.public.id}"
-  associate_public_ip_address = true
+  network_interface {
+  network_interface_id = "${aws_network_interface.jenkins_network_interface.id}"
+  device_index = 0
+  }
   key_name                    = "${var.PRIVATE_KEY}"
   root_block_device           {
       volume_type = "gp2"
@@ -132,18 +139,25 @@ resource "aws_security_group" "ansible-sg" {
   }
 }
 
+resource "aws_network_interface" "ansible_network_interface" {
+  subnet_id       = "${aws_subnet.public.id}"
+  private_ips     = ["${var.ansible_ip}"]
+  security_groups = ["${aws_security_group.ansible-sg.id}"]
+}
+
 resource "aws_instance" "ansible-server" {
   ami                         = data.aws_ami.ubuntu_linux.id
   instance_type               = "t2.micro"
-  vpc_security_group_ids      = ["${aws_security_group.ansible-sg.id}"]
-  subnet_id                   = "${aws_subnet.public.id}"
-  associate_public_ip_address = true
+  network_interface {
+  network_interface_id = "${aws_network_interface.ansible_network_interface.id}"
+  device_index = 0
+  }
   key_name                    = "${var.PRIVATE_KEY}"
   root_block_device           {
       volume_type = "gp2"
       volume_size = 10
       delete_on_termination = true
-    }
+    } 
 
   tags                         = {
     Environment		= "Homolog"

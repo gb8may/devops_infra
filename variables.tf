@@ -13,3 +13,11 @@ variable "TERRAFORM_VERSION" {
 variable "PRIVATE_KEY" {
   default = "New_Pair_Mac"
 }
+
+variable "jenkins_ip" {
+  default = "10.0.1.208"
+}
+
+variable "ansible_ip" {
+  default = "10.0.1.71"
+}

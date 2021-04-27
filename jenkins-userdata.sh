@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# Add address to hosts file
+echo "127.0.0.1   jenkins
+10.0.1.71   ansible" >> /etc/hosts 
+
 # volume setup
 vgchange -ay
 
@@ -34,3 +38,8 @@ apt-get install -y python3 openjdk-8-jre
 update-java-alternatives --set java-1.8.0-openjdk-amd64
 # install jenkins
 apt-get install -y jenkins=${JENKINS_VERSION} unzip
+
+# Install Terraform
+wget -q https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_amd64.zip \
+&& unzip -o terraform_${TERRAFORM_VERSION}_linux_amd64.zip -d /usr/local/bin \
+&& rm terraform_${TERRAFORM_VERSION}_linux_amd64.zip
