@@ -1,3 +1,72 @@
+### IAM Role and Policy
+
+# Role
+
+resource "aws_iam_role" "s3_access_role" {
+  name = "s3_access_role"
+
+  assume_role_policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Action": "sts:AssumeRole",
+      "Principal": {
+        "Service": "ec2.amazonaws.com"
+      },
+      "Effect": "Allow",
+      "Sid": ""
+    }
+  ]
+}
+EOF
+}
+
+# Profile
+
+resource "aws_iam_instance_profile" "s3_access_profile" {
+  name = "s3_access_profile"
+  role = aws_iam_role.s3_access_role.name
+}
+
+# Policy
+
+resource "aws_iam_policy" "s3_access_policy" {
+  name        = "s3_access_policy"
+  path        = "/"
+  description = "S3 access policy for AWS EC2 Instances"
+
+  policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": ["s3:ListBucket"],
+      "Resource": ["arn:aws:s3:::terraform-rep0"]
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "s3:GetObject",
+        "s3:PutObject"
+      ],
+      "Resource": ["arn:aws:s3:::terraform-rep0/*"]
+    }
+  ]
+}
+EOF
+}
+
+# Policy Attachment
+
+resource "aws_iam_role_policy_attachment" "s3_access_profile" {
+  role       = aws_iam_role.s3_access_role.name
+  policy_arn = aws_iam_policy.s3_access_policy.arn
+}
+
+
+
 ### Jenkins Init
 
 data "template_file" "jenkins-userdata" {
@@ -77,6 +146,13 @@ resource "aws_security_group" "jenkins-sg" {
     protocol = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
+
+  ingress {
+    from_port 		     = 0
+    to_port 		     = 0
+    protocol 		     = "-1"
+    security_groups 	     = ["${aws_security_group.ansible-sg.id}"]
+  }
   tags = {
     Name = "jenkins-sg"
   }
@@ -91,9 +167,10 @@ resource "aws_network_interface" "jenkins_network_interface" {
 resource "aws_instance" "jenkins-server" {
   ami                         = data.aws_ami.ubuntu_linux.id
   instance_type               = "t2.large"
+  iam_instance_profile 	      = "${aws_iam_instance_profile.s3_access_profile.name}"
   network_interface {
-  network_interface_id = "${aws_network_interface.jenkins_network_interface.id}"
-  device_index = 0
+  network_interface_id 	      = "${aws_network_interface.jenkins_network_interface.id}"
+  device_index                = 0
   }
   key_name                    = "${var.PRIVATE_KEY}"
   root_block_device           {
@@ -133,7 +210,7 @@ resource "aws_security_group" "ansible-sg" {
     protocol = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
-
+  
   tags = {
     Name = "ansible-sg"
   }
@@ -148,9 +225,10 @@ resource "aws_network_interface" "ansible_network_interface" {
 resource "aws_instance" "ansible-server" {
   ami                         = data.aws_ami.ubuntu_linux.id
   instance_type               = "t2.micro"
+  iam_instance_profile        = "${aws_iam_instance_profile.s3_access_profile.name}"
   network_interface {
-  network_interface_id = "${aws_network_interface.ansible_network_interface.id}"
-  device_index = 0
+  network_interface_id        = "${aws_network_interface.ansible_network_interface.id}"
+  device_index                = 0
   }
   key_name                    = "${var.PRIVATE_KEY}"
   root_block_device           {

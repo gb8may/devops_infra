@@ -43,3 +43,13 @@ apt-get install -y jenkins=${JENKINS_VERSION} unzip
 wget -q https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_amd64.zip \
 && unzip -o terraform_${TERRAFORM_VERSION}_linux_amd64.zip -d /usr/local/bin \
 && rm terraform_${TERRAFORM_VERSION}_linux_amd64.zip
+
+# SSH config
+echo "    StrictHostKeyChecking no" >> /etc/ssh/ssh_config
+sudo systemctl restart sshd
+
+# Copy of SSH keys
+sleep 8m
+aws s3 cp s3://terraform-rep0/id_rsa.pub .
+cat id_rsa.pub >> .ssh/authorized_keys
+

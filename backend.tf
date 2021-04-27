@@ -10,7 +10,7 @@ provider "local" {
 terraform {
   backend "s3" {
     bucket = "terraform-rep0"
-    key    = "jenkins.tfstate"
+    key    = "devops_infra.tfstate"
     region = "us-east-1"
   }
 }
