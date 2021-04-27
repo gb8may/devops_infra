@@ -37,6 +37,24 @@ data "template_cloudinit_config" "jenkins-userdata" {
 
 }
 
+### Ansible Init
+
+data "template_file" "ansible-userdata" {
+  template = "${file("ansible-userdata.sh")}"
+}
+
+data "template_cloudinit_config" "ansible-userdata" {
+
+  gzip = false
+  base64_encode = false
+
+  part {
+    content_type = "text/x-shellscript"
+    content      = "${data.template_file.ansible-userdata.rendered}"
+  }
+
+}
+
 ### EC2 Parameters
 
 data "aws_ami" "ubuntu_linux" {
