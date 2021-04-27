@@ -1,20 +1,3 @@
-provider "aws" {
-  region  = "us-east-1"
-  version = "~> 2.19"
-}
-
-provider "local" {
-  version = "~> 1.3"
-}
-
-terraform {
-  backend "s3" {
-    bucket = "terraform-rep0"
-    key    = "jenkins.tfstate"
-    region = "us-east-1"
-  }
-}
-
 ### Jenkins Init
 
 data "template_file" "jenkins-userdata" {
@@ -22,6 +5,7 @@ data "template_file" "jenkins-userdata" {
   vars = {
     DEVICE = "${var.INSTANCE_DEVICE_NAME}"
     JENKINS_VERSION = "${var.JENKINS_VERSION}"
+    TERRAFORM_VERSION = "${var.TERRAFORM_VERSION}"
   }
 }
 
@@ -67,7 +51,7 @@ data "aws_ami" "ubuntu_linux" {
   }
 }
 
-### Jenkins Server
+### Jenkins Server with Terraform
 
 resource "aws_security_group" "jenkins-sg" {
   vpc_id = "${aws_vpc.devops-vpc.id}"
@@ -104,7 +88,7 @@ resource "aws_instance" "jenkins-server" {
   vpc_security_group_ids      = ["${aws_security_group.jenkins-sg.id}"]
   subnet_id                   = "${aws_subnet.public.id}"
   associate_public_ip_address = true
-  key_name                    = "New_Pair_Mac"
+  key_name                    = "${var.PRIVATE_KEY}"
   root_block_device           {
       volume_type = "gp2"
       volume_size = 20
@@ -112,17 +96,16 @@ resource "aws_instance" "jenkins-server" {
     }
 
   tags                         = {
-    terraform_tag = "jenkins_server"
-    Name = "Jenkins"
+    Environment		= "Homolog"
+    Name 		= "Jenkins"
+    Provisioner		= "Terraform"
   }
   user_data                   = "${data.template_cloudinit_config.jenkins-userdata.rendered}"
 }
 
-output "jenkins-ip" {
+output "Jenkins_IP" {
   value = ["${aws_instance.jenkins-server.*.public_ip}"]
 }
-
-####
 
 ### Ansible Server
 
@@ -155,7 +138,7 @@ resource "aws_instance" "ansible-server" {
   vpc_security_group_ids      = ["${aws_security_group.ansible-sg.id}"]
   subnet_id                   = "${aws_subnet.public.id}"
   associate_public_ip_address = true
-  key_name                    = "New_Pair_Mac"
+  key_name                    = "${var.PRIVATE_KEY}"
   root_block_device           {
       volume_type = "gp2"
       volume_size = 10
@@ -163,13 +146,14 @@ resource "aws_instance" "ansible-server" {
     }
 
   tags                         = {
-    terraform_tag = "ansible_server"
-    Name = "Ansible"
+    Environment		= "Homolog"
+    Name 		= "Ansible"
+    Provisioner		= "Terraform"
   }
   user_data                   = "${data.template_cloudinit_config.ansible-userdata.rendered}"
 }
 
-output "ansible-ip" {
+output "Ansible_IP" {
   value = ["${aws_instance.ansible-server.*.public_ip}"]
 }
 
