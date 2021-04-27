@@ -9,6 +9,3 @@ sudo apt-get install python3-pip -y
 sudo apt install awscli -y
 pip3 install boto3
 
-sleep 60
-rm /etc/ansible/hosts
-cp hosts /etc/ansible/
