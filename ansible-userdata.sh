@@ -31,3 +31,12 @@ ssh-keygen -t rsa -N "" -C "" -f .ssh/id_rsa
 chown ubuntu:ubuntu .ssh/id_rsa*
 cat .ssh/id_rsa.pub >> .ssh/authorized_keys
 aws s3 cp .ssh/id_rsa.pub s3://terraform-rep0
+
+# Installing emmetog.jenkins via Ansible Galaxy
+ansible-galaxy install emmetog.jenkins
+
+# Downloading playbook repository
+git clone https://github.com/gb8may/devops_infra.git
+cd devops_infra/docker/
+sleep 120
+ansible-playbook playbook.yml -l jenkins -u ubuntu
