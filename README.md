@@ -9,4 +9,5 @@ Under construction....
 - Ansible install Docker, Terraform and Jenkins in one new host
 - Ansible creates a Jenkins pipeline via Jenkinsfile
 - Jenkins build a new EKS cluster using terraform
+
 (All cloud based - AWS)
