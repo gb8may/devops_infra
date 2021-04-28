@@ -53,7 +53,6 @@ echo "    StrictHostKeyChecking no" >> /etc/ssh/ssh_config
 sudo systemctl restart sshd
 
 # Copy of SSH keys
-sleep 120
 cd /home/ubuntu/
 aws s3 cp s3://terraform-rep0/id_rsa.pub .
 cat id_rsa.pub >> .ssh/authorized_keys
