@@ -17,7 +17,11 @@
           jenkins_http_port: 8080  # port to run jenkins on
           jenkins_init_file: /etc/default/jenkins # contains global settings for jenkins
           jenkins_source_config_xml: "jenkins-configs/config.xml"
+          jenkins_source_dir_configs: "jenkins-configs"
+          jenkins_users_config_xml: "jenkins-configs/users/config.xml"
           jenkins_auth: "none"
+          jenkins_config_owner: "ubuntu"
+          jenkins_config_group: "ubuntu"
 
   tasks:
         # Jenkins requires Java
@@ -91,8 +95,23 @@
             regexp: '^HTTP_PORT='
             line: 'HTTP_PORT={{ jenkins_http_port }}'
           register: jenkins_http_config   
-         
-         
+        
+        - name: Ensure main configuration file is up to date
+          template:
+            src: "{{ jenkins_source_config_xml }}"
+            dest: "/var/lib/jenkins/config.xml"
+            owner: "{{ jenkins_config_owner }}"
+            group: "{{ jenkins_config_group }}"
+            mode: 0644
+        
+        - name: Ensure main user configuration file is up to date
+          template:
+            src: "{{ jenkins_users_config_xml }}"
+            dest: "/var/lib/jenkins/users/root/config.xml"
+            owner: "{{ jenkins_config_owner }}"
+            group: "{{ jenkins_config_group }}"
+            mode: 0644
+
         - name: restart jenkins
           service:
             name: jenkins
