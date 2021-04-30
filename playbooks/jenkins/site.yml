@@ -16,6 +16,8 @@
           jenkins_pkg_url: "http://pkg.jenkins.io/debian-stable/binary"
           jenkins_http_port: 8080  # port to run jenkins on
           jenkins_init_file: /etc/default/jenkins # contains global settings for jenkins
+          jenkins_source_config_xml: "jenkins-configs/config.xml"
+          jenkins_auth: "none"
 
   tasks:
         # Jenkins requires Java
