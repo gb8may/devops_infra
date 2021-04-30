@@ -14,6 +14,7 @@ sudo systemctl restart sshd
 
 # Copy of SSH keys
 cd /home/ubuntu/
+sleep 90
 aws s3 cp s3://terraform-rep0/id_rsa.pub .
 cat id_rsa.pub >> .ssh/authorized_keys
-
+sudo apt-get install openjdk-8-jdk -y

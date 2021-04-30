@@ -1,0 +1,112 @@
+---
+- name: Install Jenkins
+  hosts: jenkins
+  gather_facts: no
+  become: yes
+
+  # Manual Jenkins install instructions can be found @
+  # Debian:
+  # http://pkg.jenkins-ci.org/debian-stable/
+  # Redhat:
+  # http://pkg.jenkins-ci.org/redhat-stable/
+
+  vars:
+          jenkins_state: present  # present or absent
+          jenkins_version: "2.204.5"  # 2.204.5 released on 2020/03/07
+          jenkins_pkg_url: "http://pkg.jenkins.io/debian-stable/binary"
+          jenkins_http_port: 8080  # port to run jenkins on
+          jenkins_init_file: /etc/default/jenkins # contains global settings for jenkins
+
+  tasks:
+        # Jenkins requires Java
+        # The best way to install Java on linux is via open-java
+        # in apt repo this is called default-jdk
+        - name: Ensure dependencies are installed
+          apt:
+            name:
+              - default-jdk
+              - curl
+              - apt-transport-https
+              - gnupg
+            state: "{{ jenkins_state }}"
+
+        # add Jenkins repo key per 
+        # http://pkg.jenkins-ci.org/debian-stable/
+        - name: Add Jenkins apt repository key
+          apt_key:
+            url: https://pkg.jenkins.io/debian-stable/jenkins.io.key
+            state: "{{ jenkins_state }}"
+
+        - name: Add Jenkins apt repository
+          apt_repository:
+            repo: deb https://pkg.jenkins.io/debian-stable binary/
+            state: "{{ jenkins_state }}"
+            update_cache: true
+        ## is this when necessary?  when: jenkins_repo_url | default(false)
+
+        # the versions of jenkins are available via
+        # http://pkg.jenkins-ci.org/debian-stable/
+        - name: Download specific Jenkins version
+          get_url:
+            # http://pkg.jenkins-ci.org/debian-stable/binary/jenkins_2.204.5_all.deb
+            url: "{{ jenkins_pkg_url }}/jenkins_{{ jenkins_version }}_all.deb"
+            dest: "/tmp/jenkins_{{ jenkins_version }}_all.deb"
+          when: jenkins_version is defined
+
+        - name: Install block
+          block:
+            - name: Install our specific version of Jenkins
+              apt:
+                deb: "/tmp/jenkins_{{ jenkins_version }}_all.deb"
+                state: "{{ jenkins_state }}"
+              when: jenkins_version is defined
+
+          rescue:
+            # edit the port that Jenkins runs on by editing
+            # the Jenkins configuration file 
+            - name: Set the port on which Jenkins runs
+              lineinfile:
+                backrefs: true
+                dest: "{{ jenkins_init_file }}"
+                regexp: '^HTTP_PORT='
+                line: 'HTTP_PORT={{ jenkins_http_port }}'
+              register: jenkins_http_config            - 
+  
+        - name: Install block
+          block:
+            - name: Install our specific version of Jenkins
+              apt:
+                deb: "/tmp/jenkins_{{ jenkins_version }}_all.deb"
+                state: "{{ jenkins_state }}"
+              when: jenkins_version is defined
+
+        # edit the port that Jenkins runs on by editing
+        # the Jenkins configuration file 
+        - name: Set the port on which Jenkins runs
+          lineinfile:    
+            backrefs: true
+            dest: "{{ jenkins_init_file }}"
+            regexp: '^HTTP_PORT='
+            line: 'HTTP_PORT={{ jenkins_http_port }}'
+          register: jenkins_http_config   
+         
+         
+        - name: restart jenkins
+          service:
+            name: jenkins
+            state: restarted
+
+        - name: let jenkins come up for the first time
+          pause:
+                  seconds: 30
+
+        # grab initial Admin password
+        - name: Get init password Jenkins
+          shell: cat /var/lib/jenkins/secrets/initialAdminPassword
+          changed_when: false
+          register: result
+
+        # display the initial Admin password on the screen
+        - name: Print init password Jenkins
+          debug:
+            var: result.stdout

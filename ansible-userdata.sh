@@ -37,6 +37,6 @@ ansible-galaxy install emmetog.jenkins
 
 # Downloading playbook repository
 git clone https://github.com/gb8may/devops_infra.git
-cd devops_infra/playbooks/docker/
+cd devops_infra/playbooks/jenkins/
 sleep 180
-ansible-playbook playbook.yaml -l jenkins -u ubuntu
+ansible-playbook site.yml -l jenkins -u ubuntu
