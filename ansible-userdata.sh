@@ -40,6 +40,6 @@ git clone https://github.com/gb8may/devops_infra.git
 cd devops_infra/playbooks/jenkins/
 sleep 120
 ssh -o "StrictHostKeyChecking no" ubuntu@ansible ansbile -m ping all
-ansible-playbook site.yml -l jenkins -u ubuntu
+bash start_play.sh
 touch timestamp
 aws s3 cp timestamp s3://terraform-rep0

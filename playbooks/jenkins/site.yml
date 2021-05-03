@@ -97,12 +97,12 @@
                   seconds: 30
 
         # grab initial Admin password
-        - name: Get init password Jenkins
-          shell: cat /var/lib/jenkins/secrets/initialAdminPassword
-          changed_when: false
-          register: result
+        #- name: Get init password Jenkins
+        #  shell: cat /var/lib/jenkins/secrets/initialAdminPassword
+        #  changed_when: false
+        #  register: result
 
         # display the initial Admin password on the screen
-        - name: Print init password Jenkins
-          debug:
-            var: result.stdout
+        #- name: Print init password Jenkins
+        #  debug:
+        #    var: result.stdout
