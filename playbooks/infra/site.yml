@@ -1,0 +1,6 @@
+---
+- name: Build Jenkins.
+  hosts: ansible
+  tasks:
+     - name: Execute the script
+       command: sh $HOME/devops_infra/playbooks/jenkins/start_play.sh
