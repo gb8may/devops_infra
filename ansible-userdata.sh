@@ -37,9 +37,7 @@ aws s3 cp .ssh/id_rsa.pub s3://terraform-rep0
 
 # Downloading playbook repository
 git clone https://github.com/gb8may/devops_infra.git
-cd devops_infra/playbooks/jenkins/
-sleep 120
-ssh -o "StrictHostKeyChecking no" ubuntu@ansible ansbile -m ping all
-bash start_play.sh
+cd devops_infra/playbooks/infra/
+ansible-playbook site.yml -l ansible
 touch timestamp
 aws s3 cp timestamp s3://terraform-rep0
