@@ -32,12 +32,12 @@ chown ubuntu:ubuntu .ssh/id_rsa*
 cat .ssh/id_rsa.pub >> .ssh/authorized_keys
 aws s3 cp .ssh/id_rsa.pub s3://terraform-rep0
 
-# Installing emmetog.jenkins via Ansible Galaxy
-# ansible-galaxy install emmetog.jenkins
-
 # Downloading playbook repository
 git clone https://github.com/gb8may/devops_infra.git
 cd devops_infra/playbooks/infra/
+sleep 120
+
+# Deploy infrastructure
 ansible-playbook site.yml -l ansible
 touch timestamp
 aws s3 cp timestamp s3://terraform-rep0
