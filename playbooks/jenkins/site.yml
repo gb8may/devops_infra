@@ -4,12 +4,6 @@
   gather_facts: no
   become: yes
 
-  # Manual Jenkins install instructions can be found @
-  # Debian:
-  # http://pkg.jenkins-ci.org/debian-stable/
-  # Redhat:
-  # http://pkg.jenkins-ci.org/redhat-stable/
-
   vars:
           jenkins_state: present  # present or absent
           jenkins_version: "2.204.5"  # 2.204.5 released on 2020/03/07
@@ -18,15 +12,11 @@
           jenkins_init_file: /etc/default/jenkins # contains global settings for jenkins
           jenkins_source_config_xml: "jenkins-configs/config.xml"
           jenkins_source_dir_configs: "jenkins-configs"
-          jenkins_users_config_xml: "jenkins-configs/users/config.xml"
           jenkins_auth: "none"
           jenkins_config_owner: "ubuntu"
           jenkins_config_group: "ubuntu"
 
   tasks:
-        # Jenkins requires Java
-        # The best way to install Java on linux is via open-java
-        # in apt repo this is called default-jdk
         - name: Ensure dependencies are installed
           apt:
             name:
@@ -36,8 +26,6 @@
               - gnupg
             state: "{{ jenkins_state }}"
 
-        # add Jenkins repo key per 
-        # http://pkg.jenkins-ci.org/debian-stable/
         - name: Add Jenkins apt repository key
           apt_key:
             url: https://pkg.jenkins.io/debian-stable/jenkins.io.key
@@ -48,10 +36,7 @@
             repo: deb https://pkg.jenkins.io/debian-stable binary/
             state: "{{ jenkins_state }}"
             update_cache: true
-        ## is this when necessary?  when: jenkins_repo_url | default(false)
 
-        # the versions of jenkins are available via
-        # http://pkg.jenkins-ci.org/debian-stable/
         - name: Download specific Jenkins version
           get_url:
             # http://pkg.jenkins-ci.org/debian-stable/binary/jenkins_2.204.5_all.deb
@@ -86,8 +71,6 @@
                 state: "{{ jenkins_state }}"
               when: jenkins_version is defined
 
-        # edit the port that Jenkins runs on by editing
-        # the Jenkins configuration file 
         - name: Set the port on which Jenkins runs
           lineinfile:    
             backrefs: true
@@ -104,14 +87,6 @@
             group: "{{ jenkins_config_group }}"
             mode: 0644
         
-        - name: Ensure main user configuration file is up to date
-          template:
-            src: "{{ jenkins_users_config_xml }}"
-            dest: "/var/lib/jenkins/users/root/config.xml"
-            owner: "{{ jenkins_config_owner }}"
-            group: "{{ jenkins_config_group }}"
-            mode: 0644
-
         - name: restart jenkins
           service:
             name: jenkins

@@ -33,10 +33,16 @@ cat .ssh/id_rsa.pub >> .ssh/authorized_keys
 aws s3 cp .ssh/id_rsa.pub s3://terraform-rep0
 
 # Installing emmetog.jenkins via Ansible Galaxy
-ansible-galaxy install emmetog.jenkins
+# ansible-galaxy install emmetog.jenkins
 
 # Downloading playbook repository
 git clone https://github.com/gb8may/devops_infra.git
 cd devops_infra/playbooks/jenkins/
 sleep 180
+touch starting_playbook
+aws s3 cp starting_playbook s3://terraform-rep0
+ansible -m ping all > play
 ansible-playbook site.yml -l jenkins -u ubuntu
+touch finishing_playbook
+aws s3 cp play s3://terraform-rep0
+aws s3 cp finishing_playbook s3://terraform-rep0
