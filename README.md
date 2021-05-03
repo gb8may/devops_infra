@@ -6,7 +6,7 @@ Complete DevOps infrastructure in code
 Under construction....
 
 - Terraform deploys Ansible
-- Ansible install Docker, Terraform and Jenkins in one new host
+- Ansible install Terraform and Jenkins in one new host
 - Ansible creates a Jenkins pipeline via Jenkinsfile
 - Jenkins build a new EKS cluster using terraform
 
