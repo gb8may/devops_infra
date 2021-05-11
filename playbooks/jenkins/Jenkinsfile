@@ -1,0 +1,18 @@
+pipeline {
+  agent any
+    stages {
+      stage('Validating'){
+        steps {
+            sh '''#!/bin/bash
+            echo "st> ==================="
+            echo "st> Validating Pipeline"
+            echo "st> ==================="
+            echo "st> "
+            echo "st> Pipeline working properly."
+            echo "st> "
+            echo "st> ==================="
+            '''
+        }
+      }
+    }
+  }

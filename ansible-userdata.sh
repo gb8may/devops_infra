@@ -34,10 +34,10 @@ aws s3 cp .ssh/id_rsa.pub s3://terraform-rep0
 
 # Downloading playbook repository
 git clone https://github.com/gb8may/devops_infra.git
-cd devops_infra/playbooks/infra/
-sleep 120
 
 # Deploy infrastructure
-ansible-playbook site.yml -l ansible
+sleep 120
 touch timestamp
 aws s3 cp timestamp s3://terraform-rep0
+sleep 60
+ansible-playbook site.yml -l jenkins -u ubuntu
